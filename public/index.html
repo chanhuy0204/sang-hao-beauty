@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sang Hào Beauty — Đặt Lịch</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8; --ink: #1A1410; --warm: #C8A96E; --accent: #8B4513;
+    --rust: #D4622A; --sage: #4A6741; --light: #FAF8F4; --muted: #8A7F72; --border: #E2D9CC;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--ink); min-height: 100vh; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  nav {
+    background: var(--ink); padding: 0 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; position: sticky; top: 0; z-index: 100; gap: 1rem;
+  }
+  .logo-area { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+  .logo-brand { font-family: 'Great Vibes', cursive; font-size: 2rem; color: var(--warm); line-height: 1; white-space: nowrap; }
+  .nav-right { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
+  .nav-btn {
+    background: none; border: 1px solid var(--warm); color: var(--warm);
+    padding: 0.35rem 0.85rem; border-radius: 4px; cursor: pointer;
+    font-family: 'Cormorant Garamond', serif; font-size: 1rem; letter-spacing: 0.04em;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-btn:hover { background: var(--warm); color: var(--ink); }
+  .nav-user { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+  .lang-toggle { display: flex; border: 1px solid rgba(200,169,110,0.4); border-radius: 4px; overflow: hidden; }
+  .lang-btn {
+    background: none; border: none; color: rgba(200,169,110,0.6);
+    padding: 0.35rem 0.65rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; font-weight: 600; transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .lang-btn.active { background: var(--warm); color: var(--ink); }
+  .lang-btn:hover:not(.active) { color: var(--warm); }
+
+  .hero { background: var(--ink); padding: 4.5rem 2rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 40%, rgba(200,169,110,0.15) 0%, transparent 60%); }
+  .hero h1 { font-family: 'Great Vibes', cursive; font-size: clamp(3rem, 8vw, 6rem); color: var(--warm); line-height: 1.1; position: relative; }
+  .hero-sub { font-family: 'Playfair Display', serif; font-size: clamp(1rem, 2.5vw, 1.4rem); color: rgba(255,255,255,0.85); margin-top: 0.3rem; position: relative; letter-spacing: 0.15em; text-transform: uppercase; }
+  .hero p { color: #aaa; margin-top: 1rem; font-size: 1rem; position: relative; }
+  .hero-cta { margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+
+  .btn-primary {
+    background: var(--warm); color: var(--ink); border: none;
+    padding: 0.85rem 2rem; border-radius: 4px;
+    font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.05rem;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .btn-primary:hover { background: #D4B97E; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,169,110,0.4); }
+  .btn-secondary {
+    background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.85rem 2rem; border-radius: 4px;
+    font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1.05rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+  .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin: 2rem auto 0; max-width: 500px; }
+  .step { display: flex; align-items: center; gap: 0.5rem; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--muted); background: #fff; transition: all 0.3s; }
+  .step.active .step-num { border-color: var(--warm); background: var(--warm); color: white; }
+  .step.done .step-num { border-color: var(--sage); background: var(--sage); color: white; }
+  .step-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+  .step.active .step-label { color: var(--ink); font-weight: 600; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 0.5rem; }
+  .step-line.done { background: var(--sage); }
+
+  .section { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .section-sub { color: var(--muted); margin-bottom: 2rem; }
+
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
+  .service-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1.6rem; cursor: pointer; transition: all 0.25s; position: relative; }
+  .service-card:hover { border-color: var(--warm); box-shadow: 0 4px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .service-card.selected { border-color: var(--warm); background: #FFF8EE; box-shadow: 0 0 0 2px var(--warm); }
+  .service-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .service-name { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .service-name-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.6rem; font-style: italic; }
+  .service-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.8rem; }
+  .service-price { font-weight: 700; color: var(--accent); font-size: 1rem; }
+  .service-duration { font-size: 0.8rem; color: var(--muted); }
+  .check-badge { position: absolute; top: 1rem; right: 1rem; width: 22px; height: 22px; background: var(--warm); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; opacity: 0; transition: opacity 0.2s; }
+  .service-card.selected .check-badge { opacity: 1; }
+
+  .booking-form-container { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; max-width: 700px; margin: 0 auto; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--ink); letter-spacing: 0.04em; }
+  .form-group input, .form-group select, .form-group textarea { border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); background: var(--light); transition: border-color 0.2s; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--warm); }
+  .form-group.full { grid-column: 1/-1; }
+
+  .time-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap: 0.55rem; margin-top: 0.5rem; }
+  .time-slot { border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.3rem; text-align: center; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; background: #fff; }
+  .time-slot:hover:not(.booked) { border-color: var(--warm); background: #FFF8EE; }
+  .time-slot.selected { background: var(--warm); border-color: var(--warm); color: white; font-weight: 600; }
+  .time-slot.booked { background: #f0ede8; color: #bbb; cursor: not-allowed; border-color: #e0dbd4; }
+  .slot-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  .time-slot.booked .slot-label { color: #ccc; }
+
+  .calendar-section { background: linear-gradient(135deg, #f0f8f0, #e8f4e8); border: 1px solid #c8e0c8; border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; }
+  .calendar-icon { font-size: 2rem; flex-shrink: 0; }
+  .calendar-info h4 { font-weight: 600; color: var(--sage); margin-bottom: 0.3rem; }
+  .calendar-info p { font-size: 0.85rem; color: #5a7a5a; }
+  .ics-btn { margin-top: 0.8rem; background: var(--sage); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .ics-btn:hover { background: #3a5631; }
+
+  .success-box { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 3rem 2rem; text-align: center; max-width: 540px; margin: 0 auto; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .success-box h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .success-box p { color: var(--muted); margin-bottom: 1.5rem; }
+  .booking-ref { background: var(--light); border: 1px dashed var(--warm); border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem; }
+  .booking-ref span { font-size: 0.8rem; color: var(--muted); display: block; }
+  .booking-ref strong { font-size: 1.1rem; color: var(--accent); letter-spacing: 0.1em; }
+
+  .login-container { max-width: 420px; margin: 4rem auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; }
+  .login-container h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .login-container p { color: var(--muted); margin-bottom: 2rem; font-size: 0.9rem; }
+  .error-msg { background: #fff0ee; border: 1px solid #ffcccc; border-radius: 6px; padding: 0.7rem 1rem; color: #c0392b; font-size: 0.85rem; margin-bottom: 1rem; }
+  .demo-creds { background: var(--light); border-radius: 6px; padding: 0.8rem 1rem; font-size: 0.8rem; color: var(--muted); margin-top: 1rem; }
+  .demo-creds strong { color: var(--ink); }
+
+  .dashboard-header { background: var(--ink); color: #fff; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .dashboard-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+  .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.8rem; flex: 1; min-width: 130px; }
+  .stat-card .stat-num { font-size: 1.9rem; font-weight: 700; color: var(--accent); font-family: 'Playfair Display', serif; }
+  .stat-card .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .filter-bar { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-bar input, .filter-bar select { border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; background: #fff; outline: none; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--warm); }
+  .bookings-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .bookings-table th { background: var(--light); padding: 0.9rem 1.2rem; text-align: left; font-size: 0.78rem; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .bookings-table td { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+  .bookings-table tr:last-child td { border-bottom: none; }
+  .bookings-table tr:hover td { background: #fdfbf8; }
+  .status-badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.73rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .status-confirmed { background: #e8f5e9; color: #2e7d32; }
+  .status-pending { background: #fff3e0; color: #e65100; }
+  .status-cancelled { background: #fce4ec; color: #c62828; }
+  .action-btn { border: none; padding: 0.32rem 0.75rem; border-radius: 4px; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-right: 0.3rem; transition: all 0.15s; }
+  .btn-confirm { background: var(--sage); color: white; }
+  .btn-confirm:hover { background: #3a5631; }
+  .btn-cancel { background: #fce4ec; color: #c62828; }
+  .btn-cancel:hover { background: #f8bbd9; }
+  .btn-view { background: var(--light); color: var(--ink); border: 1px solid var(--border); }
+  .btn-view:hover { background: var(--border); }
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 2rem; }
+  .tab-btn { padding: 0.8rem 1.4rem; background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--warm); font-weight: 600; }
+  .overflow-x { overflow-x: auto; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+  .modal-row { display: flex; justify-content: space-between; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .modal-row:last-of-type { border-bottom: none; }
+  .modal-row span:first-child { color: var(--muted); font-size: 0.78rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .modal-row span:last-child { font-weight: 500; text-align: right; }
+  .modal-actions { margin-top: 1.5rem; display: flex; gap: 0.8rem; justify-content: flex-end; }
+  .btn-close-modal { background: var(--light); border: 1px solid var(--border); padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1rem; }
+  .loading { opacity: 0.5; pointer-events: none; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media(max-width:768px) { .bookings-table { font-size: 0.78rem; } .bookings-table th, .bookings-table td { padding: 0.6rem 0.7rem; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo-area">
+    <div style="position:relative" title="Click to upload logo">
+      <canvas id="logo-canvas" width="46" height="46" style="display:none;border-radius:4px;cursor:pointer" onclick="document.getElementById('logo-input').click()"></canvas>
+      <div id="logo-placeholder" onclick="document.getElementById('logo-input').click()" style="width:40px;height:40px;border:2px dashed rgba(200,169,110,0.5);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:rgba(200,169,110,0.5)">+</div>
+    </div>
+    <span class="logo-brand">Sang Hào Beauty</span>
+    <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="uploadLogo(event)">
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user-info"></span>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lang-vi" onclick="setLang('vi')">VI</button>
+      <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="nav-btn" onclick="showCustomer()" data-vi="Đặt Lịch" data-en="Book Now">Đặt Lịch</button>
+    <button class="nav-btn" id="nav-staff" onclick="showStaffPortal()" data-vi="Nhân Viên" data-en="Staff Portal">Nhân Viên</button>
+    <button class="nav-btn" id="nav-logout" onclick="staffLogout()" style="display:none" data-vi="Đăng Xuất" data-en="Logout">Đăng Xuất</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="view-home" class="view active">
+  <div class="hero">
+    <h1>Sang Hào Beauty</h1>
+    <div class="hero-sub" data-vi="Thẩm Mỹ Cao Cấp" data-en="Premium Beauty Services">Thẩm Mỹ Cao Cấp</div>
+    <p data-vi="Dịch vụ làm đẹp chuyên nghiệp — đặt lịch nhanh chóng, tiện lợi" data-en="Professional beauty services — fast and convenient booking">Dịch vụ làm đẹp chuyên nghiệp — đặt lịch nhanh chóng, tiện lợi</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="startBooking()" data-vi="Đặt Lịch Ngay" data-en="Book an Appointment">Đặt Lịch Ngay</button>
+      <button class="btn-secondary" onclick="showStaffPortal()" data-vi="Đăng Nhập Nhân Viên →" data-en="Staff Login →">Đăng Nhập Nhân Viên →</button>
+    </div>
+    <div class="steps" id="booking-steps" style="display:none">
+      <div class="step" id="step1"><div class="step-num">1</div><span class="step-label" data-vi="Dịch Vụ" data-en="Service">Dịch Vụ</span></div>
+      <div class="step-line" id="line1"></div>
+      <div class="step" id="step2"><div class="step-num">2</div><span class="step-label" data-vi="Thông Tin" data-en="Details">Thông Tin</span></div>
+      <div class="step-line" id="line2"></div>
+      <div class="step" id="step3"><div class="step-num">3</div><span class="step-label" data-vi="Xác Nhận" data-en="Confirm">Xác Nhận</span></div>
+    </div>
+  </div>
+  <div id="booking-section" style="display:none">
+    <div class="section" id="section-services">
+      <div class="section-title" data-vi="Chọn Dịch Vụ" data-en="Choose a Service">Chọn Dịch Vụ</div>
+      <div class="section-sub" data-vi="Chọn dịch vụ bạn muốn đặt lịch" data-en="Select the service you would like to book">Chọn dịch vụ bạn muốn đặt lịch</div>
+      <div class="services-grid" id="services-grid"><p style="color:var(--muted)">Đang tải... / Loading...</p></div>
+      <div style="margin-top:2rem;text-align:right">
+        <button class="btn-primary" id="next-to-form" onclick="nextToForm()" disabled data-vi="Tiếp Theo: Chọn Giờ →" data-en="Next: Pick a Time →">Tiếp Theo: Chọn Giờ →</button>
+      </div>
+    </div>
+    <div class="section" id="section-form" style="display:none">
+      <div class="booking-form-container">
+        <h2 class="section-title" style="margin-bottom:0.3rem" data-vi="Thông Tin Của Bạn" data-en="Your Details">Thông Tin Của Bạn</h2>
+        <p class="section-sub" data-vi="Điền thông tin và chọn giờ phù hợp" data-en="Fill in your info and choose your preferred time">Điền thông tin và chọn giờ phù hợp</p>
+        <div class="form-grid">
+          <div class="form-group"><label data-vi="HỌ" data-en="LAST NAME">HỌ</label><input type="text" id="f-last" placeholder="Nguyễn"></div>
+          <div class="form-group"><label data-vi="TÊN" data-en="FIRST NAME">TÊN</label><input type="text" id="f-first" placeholder="Lan"></div>
+          <div class="form-group"><label>EMAIL</label><input type="email" id="f-email" placeholder="example@email.com"></div>
+          <div class="form-group"><label data-vi="SỐ ĐIỆN THOẠI" data-en="PHONE">SỐ ĐIỆN THOẠI</label><input type="tel" id="f-phone" placeholder="0901 234 567"></div>
+          <div class="form-group"><label data-vi="NGÀY ĐẶT LỊCH" data-en="PREFERRED DATE">NGÀY ĐẶT LỊCH</label><input type="date" id="f-date" onchange="loadTimeSlots()"></div>
+          <div class="form-group"><label data-vi="DỊCH VỤ ĐÃ CHỌN" data-en="SELECTED SERVICE">DỊCH VỤ ĐÃ CHỌN</label><input type="text" id="f-service-display" readonly style="background:#f5f0e8;font-weight:600;"></div>
+          <div class="form-group full">
+            <label data-vi="KHUNG GIỜ TRỐNG" data-en="AVAILABLE TIME SLOTS">KHUNG GIỜ TRỐNG</label>
+            <div class="time-slots" id="time-slots-container"><p style="color:var(--muted);font-size:0.85rem;grid-column:1/-1" data-vi="Vui lòng chọn ngày trước" data-en="Please select a date first">Vui lòng chọn ngày trước</p></div>
+          </div>
+          <div class="form-group full"><label data-vi="GHI CHÚ (tùy chọn)" data-en="NOTES (optional)">GHI CHÚ (tùy chọn)</label><textarea id="f-notes" rows="3" placeholder="Yêu cầu đặc biệt..."></textarea></div>
+        </div>
+        <div class="calendar-section">
+          <div class="calendar-icon">📅</div>
+          <div class="calendar-info">
+            <h4 data-vi="Thêm vào Lịch của bạn" data-en="Add to Your Calendar">Thêm vào Lịch của bạn</h4>
+            <p data-vi="Sau khi đặt lịch, tải file .ics để thêm vào Google Calendar, Apple Calendar hoặc Outlook." data-en="After booking, download an .ics file to add to Google Calendar, Apple Calendar or Outlook.">Sau khi đặt lịch, tải file .ics để thêm vào Google Calendar, Apple Calendar hoặc Outlook.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:2rem;justify-content:space-between">
+          <button class="btn-secondary" style="color:var(--ink);border-color:var(--border)" onclick="backToServices()" data-vi="← Quay Lại" data-en="← Back">← Quay Lại</button>
+          <button class="btn-primary" id="submit-btn" onclick="submitBooking()" data-vi="Xác Nhận Đặt Lịch →" data-en="Confirm Booking →">Xác Nhận Đặt Lịch →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="view-success" class="view">
+  <div class="section">
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <h2 data-vi="Đặt Lịch Thành Công!" data-en="Booking Confirmed!">Đặt Lịch Thành Công!</h2>
+      <p data-vi="Chúng tôi đã nhận được yêu cầu và sẽ liên hệ xác nhận sớm nhất." data-en="We received your booking and will confirm shortly.">Chúng tôi đã nhận được yêu cầu và sẽ liên hệ xác nhận sớm nhất.</p>
+      <div class="booking-ref"><span data-vi="MÃ ĐẶT LỊCH" data-en="BOOKING REFERENCE">MÃ ĐẶT LỊCH</span><strong id="booking-ref-num"></strong></div>
+      <div id="success-details"></div>
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <button class="ics-btn" style="padding:0.7rem 1.5rem" onclick="downloadICS()" data-vi="📅 Thêm vào Lịch (.ics)" data-en="📅 Add to Calendar (.ics)">📅 Thêm vào Lịch (.ics)</button>
+        <button class="btn-primary" onclick="startBooking()" data-vi="Đặt Lịch Thêm" data-en="Book Another">Đặt Lịch Thêm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAFF LOGIN -->
+<div id="view-staff-login" class="view">
+  <div class="login-container">
+    <h2 data-vi="Cổng Nhân Viên" data-en="Staff Portal">Cổng Nhân Viên</h2>
+    <p data-vi="Đăng nhập để quản lý lịch đặt" data-en="Sign in to manage bookings">Đăng nhập để quản lý lịch đặt</p>
+    <div id="login-error" class="error-msg" style="display:none"></div>
+    <div class="form-group" style="margin-bottom:1rem"><label data-vi="TÊN ĐĂNG NHẬP" data-en="USERNAME">TÊN ĐĂNG NHẬP</label><input type="text" id="login-user" placeholder="admin"></div>
+    <div class="form-group" style="margin-bottom:1.5rem"><label data-vi="MẬT KHẨU" data-en="PASSWORD">MẬT KHẨU</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-primary" style="width:100%" id="login-btn" onclick="doLogin()" data-vi="Đăng Nhập →" data-en="Sign In →">Đăng Nhập →</button>
+    <div class="demo-creds"><strong>Demo:</strong> admin / reserve2025 &nbsp;|&nbsp; staff / staff123</div>
+  </div>
+</div>
+
+<!-- STAFF DASHBOARD -->
+<div id="view-staff-dashboard" class="view">
+  <div class="dashboard-header">
+    <div><h2 data-vi="Quản Lý Lịch Đặt" data-en="Booking Dashboard">Quản Lý Lịch Đặt</h2><p style="color:#888;font-size:0.85rem;margin-top:0.2rem" id="dash-welcome"></p></div>
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+      <button class="nav-btn" onclick="exportCSV()" data-vi="⬇ Xuất CSV" data-en="⬇ Export CSV">⬇ Xuất CSV</button>
+      <button class="nav-btn" onclick="staffLogout()" data-vi="Đăng Xuất" data-en="Logout">Đăng Xuất</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('all',this)" data-vi="Tất Cả" data-en="All">Tất Cả</button>
+      <button class="tab-btn" onclick="switchTab('pending',this)" data-vi="Chờ Xác Nhận" data-en="Pending">Chờ Xác Nhận</button>
+      <button class="tab-btn" onclick="switchTab('confirmed',this)" data-vi="Đã Xác Nhận" data-en="Confirmed">Đã Xác Nhận</button>
+      <button class="tab-btn" onclick="switchTab('cancelled',this)" data-vi="Đã Hủy" data-en="Cancelled">Đã Hủy</button>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="search-bookings" oninput="loadDashboard()" style="flex:1;min-width:200px" placeholder="🔍 Tìm kiếm...">
+      <input type="date" id="filter-date" onchange="loadDashboard()">
+      <select id="filter-service" onchange="loadDashboard()"><option value="">-- Tất cả dịch vụ --</option></select>
+    </div>
+    <div class="overflow-x">
+      <table class="bookings-table" id="bookings-table">
+        <thead><tr>
+          <th data-vi="Mã" data-en="Ref">Mã</th>
+          <th data-vi="Khách Hàng" data-en="Customer">Khách Hàng</th>
+          <th data-vi="Dịch Vụ" data-en="Service">Dịch Vụ</th>
+          <th data-vi="Ngày & Giờ" data-en="Date & Time">Ngày & Giờ</th>
+          <th data-vi="Liên Hệ" data-en="Contact">Liên Hệ</th>
+          <th data-vi="Trạng Thái" data-en="Status">Trạng Thái</th>
+          <th data-vi="Thao Tác" data-en="Actions">Thao Tác</th>
+        </tr></thead>
+        <tbody id="bookings-tbody"></tbody>
+      </table>
+    </div>
+    <div id="empty-state" class="empty-state" style="display:none"><div class="empty-icon">📋</div><p data-vi="Không tìm thấy lịch đặt" data-en="No bookings found">Không tìm thấy lịch đặt</p></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 data-vi="Chi Tiết Đặt Lịch" data-en="Booking Details">Chi Tiết Đặt Lịch</h3>
+    <div id="modal-content"></div>
+    <div class="modal-actions"><button class="btn-close-modal" onclick="closeModal()" data-vi="Đóng" data-en="Close">Đóng</button></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────
+const API = ''; // Empty = same origin (http://localhost:3000)
+
+// ─── STATE ─────────────────────────────────────────────────
+let currentLang    = localStorage.getItem('sh_lang') || 'vi';
+let selectedService = null;
+let selectedSlot    = null;
+let currentTab      = 'all';
+let loggedInUser    = null;
+let lastBooking     = null;
+let SERVICES        = [];
+let allBookings     = [];
+
+// ─── LANGUAGE ──────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('sh_lang', lang);
+  document.getElementById('lang-vi').classList.toggle('active', lang === 'vi');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-vi]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang) || el.textContent;
+  });
+  renderServices();
+}
+
+function t(vi, en) { return currentLang === 'vi' ? vi : en; }
+
+function formatDuration(mins) {
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (currentLang === 'vi') return m ? `${h} giờ ${m} phút` : `${h} giờ`;
+  return m ? `${h}h ${m}min` : `${h} hour${h > 1 ? 's' : ''}`;
+}
+
+function formatPrice(p) {
+  return Number(p).toLocaleString('vi-VN') + ' ₫';
+}
+
+function formatDate(d) {
+  const [y, m, day] = d.split('-');
+  if (currentLang === 'vi') return `${parseInt(day)} tháng ${parseInt(m)}, ${y}`;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+// ─── API HELPER ────────────────────────────────────────────
+async function apiFetch(url, options = {}) {
+  try {
+    const res = await fetch(API + url, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// ─── VIEWS ─────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function showCustomer() {
+  showView('view-home');
+  document.getElementById('booking-steps').style.display = 'none';
+  document.getElementById('booking-section').style.display = 'none';
+}
+async function startBooking() {
+  showView('view-home');
+  document.getElementById('booking-steps').style.display = 'flex';
+  document.getElementById('booking-section').style.display = 'block';
+  document.getElementById('section-services').style.display = 'block';
+  document.getElementById('section-form').style.display = 'none';
+  setStep(1);
+  await fetchAndRenderServices();
+}
+function showStaffPortal() {
+  if (loggedInUser) showDashboard(); else showView('view-staff-login');
+}
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    const s = document.getElementById('step' + i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    if (i === n) s.classList.add('active');
+  });
+  [1,2].forEach(i => document.getElementById('line' + i).classList.toggle('done', i < n));
+}
+
+// ─── SERVICES ──────────────────────────────────────────────
+async function fetchAndRenderServices() {
+  try {
+    const res = await apiFetch('/api/services');
+    SERVICES = res.data;
+    // Populate service filter in dashboard
+    const sel = document.getElementById('filter-service');
+    sel.innerHTML = `<option value="">-- ${t('Tất cả dịch vụ','All Services')} --</option>` +
+      SERVICES.map(s => `<option value="${s.id}">${currentLang==='vi'?s.name_vi:s.name_en}</option>`).join('');
+    renderServices();
+  } catch (err) {
+    document.getElementById('services-grid').innerHTML = `<p style="color:red">${t('Không thể tải dịch vụ.','Failed to load services.')} ${err.message}</p>`;
+  }
+}
+
+function renderServices() {
+  if (!SERVICES.length) return;
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = SERVICES.map(s => {
+    const name    = currentLang === 'vi' ? s.name_vi    : s.name_en;
+    const nameAlt = currentLang === 'vi' ? s.name_en    : s.name_vi;
+    const desc    = currentLang === 'vi' ? s.description_vi : s.description_en;
+    return `<div class="service-card ${selectedService && selectedService.id === s.id ? 'selected':''}" onclick="selectService(${s.id})">
+      <div class="check-badge">✓</div>
+      <div class="service-icon">${s.icon}</div>
+      <div class="service-name">${name}</div>
+      <div class="service-name-sub">${nameAlt}</div>
+      <div class="service-desc">${desc}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="service-price">${formatPrice(s.price)}</span>
+        <span class="service-duration">⏱ ${formatDuration(s.duration_mins)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectService(id) {
+  selectedService = SERVICES.find(s => s.id === id);
+  renderServices();
+  document.getElementById('next-to-form').disabled = false;
+}
+
+function nextToForm() {
+  if (!selectedService) return;
+  document.getElementById('section-services').style.display = 'none';
+  document.getElementById('section-form').style.display = 'block';
+  const name = currentLang === 'vi' ? selectedService.name_vi : selectedService.name_en;
+  document.getElementById('f-service-display').value = `${selectedService.icon} ${name} — ${formatPrice(selectedService.price)}`;
+  document.getElementById('f-date').min = new Date().toISOString().split('T')[0];
+  setStep(2); selectedSlot = null;
+}
+function backToServices() {
+  document.getElementById('section-services').style.display = 'block';
+  document.getElementById('section-form').style.display = 'none';
+  setStep(1);
+}
+
+// ─── TIME SLOTS ────────────────────────────────────────────
+async function loadTimeSlots() {
+  const date = document.getElementById('f-date').value;
+  if (!date || !selectedService) return;
+  const container = document.getElementById('time-slots-container');
+  container.innerHTML = `<p style="color:var(--muted);font-size:0.85rem;grid-column:1/-1"><span class="spinner"></span>${t('Đang tải...','Loading...')}</p>`;
+  selectedSlot = null;
+
+  try {
+    const res = await apiFetch(`/api/slots?date=${date}&duration_mins=${selectedService.duration_mins}`);
+    const now     = new Date();
+    const isToday = date === now.toISOString().split('T')[0];
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    container.innerHTML = res.data.map(slot => {
+      const [h, m] = slot.time.split(':').map(Number);
+      const isPast  = isToday && (h * 60 + m) <= nowMins;
+      const disabled = slot.booked || isPast;
+      const labelVi = disabled ? (slot.booked ? 'Đã đặt' : 'Đã qua') : 'Còn trống';
+      const labelEn = disabled ? (slot.booked ? 'Booked'  : 'Past')   : 'Available';
+      return `<div class="time-slot ${disabled?'booked':''}" ${disabled?'':'onclick="selectSlot(\''+slot.time+'\')"'}>
+        ${slot.time}<div class="slot-label">${currentLang==='vi'?labelVi:labelEn}</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    container.innerHTML = `<p style="color:red;grid-column:1/-1">${t('Không thể tải khung giờ.','Failed to load time slots.')}</p>`;
+  }
+}
+
+function selectSlot(t) {
+  selectedSlot = t;
+  document.querySelectorAll('.time-slot').forEach(el => {
+    el.classList.toggle('selected', el.textContent.trim().startsWith(t));
+  });
+}
+
+// ─── BOOKING SUBMIT ────────────────────────────────────────
+async function submitBooking() {
+  const first = document.getElementById('f-first').value.trim();
+  const last  = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const date  = document.getElementById('f-date').value;
+  const notes = document.getElementById('f-notes').value.trim();
+
+  if (!first || !last) return alert(t('Vui lòng nhập họ tên.','Please enter your name.'));
+  if (!email) return alert(t('Vui lòng nhập email.','Please enter your email.'));
+  if (!date)  return alert(t('Vui lòng chọn ngày.','Please select a date.'));
+  if (!selectedSlot) return alert(t('Vui lòng chọn khung giờ.','Please select a time slot.'));
+
+  const btn = document.getElementById('submit-btn');
+  btn.innerHTML = `<span class="spinner"></span>${t('Đang xử lý...','Processing...')}`;
+  btn.disabled = true;
+
+  try {
+    const res = await apiFetch('/api/bookings', {
+      method: 'POST',
+      body: JSON.stringify({
+        first_name: first, last_name: last, email, phone,
+        service_id: selectedService.id,
+        booking_date: date, booking_time: selectedSlot, notes
+      })
+    });
+
+    lastBooking = { ...res.data, email, first_name: first, last_name: last };
+    setStep(3);
+    document.getElementById('booking-ref-num').textContent = res.data.ref_code;
+    const svcName = currentLang === 'vi' ? res.data.service_name_vi : res.data.service_name_en;
+    document.getElementById('success-details').innerHTML = `
+      <div style="text-align:left;margin-top:1rem">
+        ${mdr(t('Dịch vụ','Service'), selectedService.icon + ' ' + svcName)}
+        ${mdr(t('Ngày','Date'), formatDate(date))}
+        ${mdr(t('Giờ','Time'), selectedSlot)}
+        ${mdr(t('Thời gian','Duration'), formatDuration(res.data.duration_mins))}
+        ${mdr(t('Giá','Price'), formatPrice(res.data.service_price))}
+      </div>`;
+
+    selectedService = null; selectedSlot = null;
+    ['f-first','f-last','f-email','f-phone','f-date','f-notes'].forEach(id => document.getElementById(id).value = '');
+    showView('view-success');
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    const viText = 'Xác Nhận Đặt Lịch →'; const enText = 'Confirm Booking →';
+    btn.innerHTML = currentLang === 'vi' ? viText : enText;
+    btn.disabled = false;
+  }
+}
+
+function mdr(label, val) {
+  return `<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.9rem">
+    <span style="color:var(--muted);font-size:0.78rem;text-transform:uppercase;font-weight:600">${label}</span>
+    <span style="font-weight:500">${val}</span></div>`;
+}
+
+// ─── ICS ───────────────────────────────────────────────────
+function downloadICS() {
+  if (!lastBooking) return;
+  const b = lastBooking;
+  const [y, mo, d] = b.booking_date.split('-');
+  const [h, mi]    = b.booking_time.split(':');
+  const endDate = new Date(+y, +mo-1, +d, +h, +mi + b.duration_mins);
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = dt => `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Sang Hào Beauty//EN',
+    'BEGIN:VEVENT',
+    `UID:${b.ref_code}@sanghaobeauty.com`,
+    `SUMMARY:${b.service_name_vi} — Sang Hào Beauty`,
+    `DTSTART:${y}${mo}${d}T${h}${mi}00`,
+    `DTEND:${fmt(endDate)}`,
+    `DESCRIPTION:Mã đặt lịch: ${b.ref_code}\\nGiá: ${formatPrice(b.service_price)}`,
+    'LOCATION:Sang Hào Beauty','STATUS:CONFIRMED',
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `sanghao-${b.ref_code}.ics`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── STAFF AUTH ────────────────────────────────────────────
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+  const btn  = document.getElementById('login-btn');
+  btn.innerHTML = `<span class="spinner"></span>${t('Đang đăng nhập...','Signing in...')}`;
+  btn.disabled = true;
+
+  try {
+    const res = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    loggedInUser = res.data;
+    err.style.display = 'none';
+    document.getElementById('nav-user-info').textContent = `👤 ${res.data.username}`;
+    document.getElementById('nav-logout').style.display = 'inline-block';
+    showDashboard();
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  } finally {
+    btn.innerHTML = t('Đăng Nhập →','Sign In →');
+    btn.disabled = false;
+  }
+}
+
+async function staffLogout() {
+  await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  loggedInUser = null;
+  document.getElementById('nav-user-info').textContent = '';
+  document.getElementById('nav-logout').style.display = 'none';
+  showView('view-home');
+}
+
+// ─── DASHBOARD ─────────────────────────────────────────────
+async function showDashboard() {
+  if (!SERVICES.length) await fetchAndRenderServices();
+  document.getElementById('dash-welcome').textContent = t(
+    `Xin chào, ${loggedInUser.username} — ${formatDate(new Date().toISOString().split('T')[0])}`,
+    `Welcome, ${loggedInUser.username} — ${formatDate(new Date().toISOString().split('T')[0])}`
+  );
+  showView('view-staff-dashboard');
+  await loadStats();
+  await loadDashboard();
+}
+
+async function loadStats() {
+  try {
+    const res = await apiFetch('/api/admin/stats');
+    const s   = res.data;
+    document.getElementById('stats-row').innerHTML = [
+      [t('Tổng lịch đặt','Total Bookings'), s.total,     '📋'],
+      [t('Hôm nay','Today'),                s.today,     '📅'],
+      [t('Chờ xác nhận','Pending'),         s.pending,   '⏳'],
+      [t('Đã xác nhận','Confirmed'),        s.confirmed, '✅'],
+    ].map(([label, num, icon]) =>
+      `<div class="stat-card"><div class="stat-num">${icon} ${num}</div><div class="stat-label">${label}</div></div>`
+    ).join('');
+  } catch (e) { console.error('Stats error:', e); }
+}
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  const search  = document.getElementById('search-bookings').value;
+  const date    = document.getElementById('filter-date').value;
+  const service = document.getElementById('filter-service').value;
+
+  let url = `/api/admin/bookings?status=${currentTab}`;
+  if (search)  url += `&search=${encodeURIComponent(search)}`;
+  if (date)    url += `&date=${date}`;
+  if (service) url += `&service_id=${service}`;
+
+  try {
+    const res = await apiFetch(url);
+    allBookings = res.data;
+    renderTable(allBookings);
+    await loadStats();
+  } catch (e) {
+    document.getElementById('bookings-tbody').innerHTML = `<tr><td colspan="7" style="color:red;padding:2rem">${e.message}</td></tr>`;
+  }
+}
+
+const statusLabels = {
+  pending:   () => t('Chờ xác nhận','Pending'),
+  confirmed: () => t('Đã xác nhận','Confirmed'),
+  cancelled: () => t('Đã hủy','Cancelled'),
+};
+
+function renderTable(data) {
+  const tbody = document.getElementById('bookings-tbody');
+  const empty = document.getElementById('empty-state');
+  if (!data.length) {
+    tbody.innerHTML = '';
+    document.getElementById('bookings-table').style.display = 'none';
+    empty.style.display = 'block'; return;
+  }
+  document.getElementById('bookings-table').style.display = 'table';
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(b => {
+    const svc = currentLang === 'vi' ? b.service_name_vi : b.service_name_en;
+    return `<tr>
+      <td><code style="font-size:0.75rem;color:var(--accent)">${b.ref_code}</code></td>
+      <td><strong>${b.last_name} ${b.first_name}</strong></td>
+      <td>${b.service_icon} ${svc}</td>
+      <td>${formatDate(b.booking_date)}<br><span style="color:var(--muted);font-size:0.78rem">🕐 ${b.booking_time_fmt} (${formatDuration(b.duration_mins)})</span></td>
+      <td><a href="mailto:${b.email}" style="color:var(--ink)">${b.email}</a><br><span style="color:var(--muted);font-size:0.78rem">${b.phone||'—'}</span></td>
+      <td><span class="status-badge status-${b.status}">${statusLabels[b.status]?.() || b.status}</span></td>
+      <td>
+        <button class="action-btn btn-view" onclick="viewBooking(${b.id})">${t('Xem','View')}</button>
+        ${b.status==='pending'?`<button class="action-btn btn-confirm" onclick="updateStatus(${b.id},'confirmed')">${t('Xác nhận','Confirm')}</button>`:''}
+        ${b.status!=='cancelled'?`<button class="action-btn btn-cancel" onclick="updateStatus(${b.id},'cancelled')">${t('Hủy','Cancel')}</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateStatus(id, status) {
+  const msg = status === 'cancelled'
+    ? t(`Hủy lịch đặt này?`, `Cancel this booking?`)
+    : t(`Xác nhận lịch đặt này?`, `Confirm this booking?`);
+  if (!confirm(msg)) return;
+  try {
+    await apiFetch(`/api/admin/bookings/${id}/status`, {
+      method: 'PUT', body: JSON.stringify({ status })
+    });
+    await loadDashboard();
+  } catch (e) { alert(e.message); }
+}
+
+async function viewBooking(id) {
+  try {
+    const res = await apiFetch(`/api/admin/bookings/${id}`);
+    const b   = res.data;
+    const svc = currentLang === 'vi' ? b.service_name_vi : b.service_name_en;
+    document.getElementById('modal-content').innerHTML = [
+      [t('Mã đặt lịch','Reference'), b.ref_code],
+      [t('Khách hàng','Customer'),   `${b.last_name} ${b.first_name}`],
+      ['Email', b.email],
+      [t('Điện thoại','Phone'),      b.phone || '—'],
+      [t('Dịch vụ','Service'),       `${b.service_icon} ${svc}`],
+      [t('Giá','Price'),             formatPrice(b.service_price)],
+      [t('Thời gian','Duration'),    formatDuration(b.duration_mins)],
+      [t('Ngày','Date'),             formatDate(b.booking_date)],
+      [t('Giờ','Time'),              `${b.booking_time_fmt} – ${b.end_time_fmt}`],
+      [t('Trạng thái','Status'),     `<span class="status-badge status-${b.status}">${statusLabels[b.status]?.() || b.status}</span>`],
+      ...(b.notes ? [[t('Ghi chú','Notes'), b.notes]] : []),
+      [t('Thời điểm đặt','Booked At'), new Date(b.created_at).toLocaleString()],
+    ].map(([k,v]) => `<div class="modal-row"><span>${k}</span><span>${v}</span></div>`).join('');
+    document.getElementById('modal-overlay').classList.add('open');
+  } catch (e) { alert(e.message); }
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+// ─── EXPORT CSV ────────────────────────────────────────────
+function exportCSV() {
+  const headers = ['Ref','Họ','Tên','Email','Điện thoại','Dịch vụ (VI)','Dịch vụ (EN)','Giá','Ngày','Giờ','Thời lượng (phút)','Trạng thái','Ghi chú','Ngày đặt'];
+  const rows    = allBookings.map(b => [
+    b.ref_code, b.last_name, b.first_name, b.email, b.phone||'',
+    b.service_name_vi, b.service_name_en, b.service_price,
+    b.booking_date, b.booking_time_fmt, b.duration_mins,
+    b.status, (b.notes||'').replace(/,/g,' '), new Date(b.created_at).toLocaleString()
+  ]);
+  const csv = [headers,...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='sanghao-bookings.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── LOGO ──────────────────────────────────────────────────
+function uploadLogo(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => processLogo(ev.target.result);
+  reader.readAsDataURL(file);
+}
+function processLogo(src) {
+  const img = new Image();
+  img.onload = function() {
+    const s=92, c=document.getElementById('logo-canvas');
+    c.width=s; c.height=s; c.style.width='46px'; c.style.height='46px';
+    const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,s,s);
+    const id=ctx.getImageData(0,0,s,s), d=id.data;
+    for(let i=0;i<d.length;i+=4) d[i+3]=Math.max(d[i],d[i+1],d[i+2]);
+    ctx.putImageData(id,0,0); c.style.display='block';
+    const p=document.getElementById('logo-placeholder'); if(p) p.style.display='none';
+    try{localStorage.setItem('sh_logo_v2',c.toDataURL());}catch(e){}
+  }; img.src=src;
+}
+(function(){ try{ const s=localStorage.getItem('sh_logo_v2'); if(s) processLogo(s); }catch(e){} })();
+
+// ─── INIT ──────────────────────────────────────────────────
+// Check if already logged in (session persists on page reload)
+apiFetch('/api/auth/me').then(res => {
+  loggedInUser = res.data;
+  document.getElementById('nav-user-info').textContent = `👤 ${res.data.username}`;
+  document.getElementById('nav-logout').style.display = 'inline-block';
+}).catch(() => {});
+
+setLang(currentLang);
+</script>
+</body>
+</html>
