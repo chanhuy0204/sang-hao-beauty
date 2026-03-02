@@ -34,6 +34,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME     || 'sang_hao_beauty',
   charset:  'utf8mb4',
+  ssl: { rejectUnauthorized: false }
 };
 
 let db;
