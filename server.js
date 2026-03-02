@@ -32,9 +32,8 @@ const dbConfig = {
   port:     process.env.DB_PORT     || 3306,
   user:     process.env.DB_USER     || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME     || 'sang_hao_beauty',
+  database: process.env.DB_NAME     || 'railway',
   charset:  'utf8mb4',
-  ssl: { rejectUnauthorized: false }
 };
 
 let db;
