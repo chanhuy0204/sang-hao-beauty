@@ -40,6 +40,12 @@ const dbConfig = {
 let db;
 async function connectDB() {
   try {
+    console.log('🔄 Connecting to MySQL...', {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+    });
     db = await mysql.createConnection(dbConfig);
     console.log('✅ Connected to MySQL database:', dbConfig.database);
   } catch (err) {
